@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>医療ツール集 — Clinical Tools Library</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Hiragino Sans', 'Yu Gothic UI', 'Meiryo', sans-serif;
+  background: #faf8f3;
+  color: #1a2332;
+  min-height: 100vh;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-image:
+    radial-gradient(circle at 15% 25%, rgba(13,110,99,0.018) 0, transparent 50%),
+    radial-gradient(circle at 85% 75%, rgba(196,184,164,0.04) 0, transparent 50%);
+}
+
+.container { max-width: 760px; margin: 0 auto; padding: 3.5rem 1.5rem 4rem; }
+
+/* ── Hero ────────────────────────────────── */
+.hero {
+  text-align: center;
+  margin-bottom: 4rem;
+  padding-bottom: 2.5rem;
+  border-bottom: 0.5px solid #d8d0c0;
+}
+.hero-ornament {
+  color: #c4b8a4;
+  font-size: 14px;
+  letter-spacing: 0.5em;
+  margin-bottom: 1.5rem;
+  font-family: 'Hiragino Mincho ProN', serif;
+}
+.hero-title {
+  font-family: 'Hiragino Mincho ProN', 'Yu Mincho', 'Times New Roman', serif;
+  font-size: 30px;
+  font-weight: 500;
+  color: #1a2332;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.08em;
+}
+.hero-subtitle {
+  font-size: 11px;
+  color: #8b7e6b;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  margin-bottom: 1.8rem;
+}
+.hero-desc {
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.9;
+  max-width: 460px;
+  margin: 0 auto;
+}
+
+/* ── Category ────────────────────────────── */
+.category { margin-bottom: 2.8rem; }
+.category-label {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 1.1rem;
+  font-size: 11px;
+  color: #8b7e6b;
+  letter-spacing: 0.3em;
+  font-weight: 500;
+}
+.category-label::before,
+.category-label::after {
+  content: '';
+  height: 0.5px;
+  background: #d8d0c0;
+  flex: 1;
+}
+.category-num {
+  font-family: 'Hiragino Mincho ProN', serif;
+  color: #c4b8a4;
+  font-size: 13px;
+  letter-spacing: 0;
+  margin-right: 4px;
+}
+
+/* ── Tool grid ───────────────────────────── */
+.tool-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+.tool-card {
+  background: white;
+  border: 0.5px solid #e2dcd0;
+  border-radius: 8px;
+  padding: 1.5rem 1.6rem 1.3rem;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: all 0.22s ease;
+  overflow: hidden;
+}
+.tool-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: #0d6e63;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+.tool-card:hover {
+  border-color: #c4b8a4;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(13,110,99,0.08), 0 2px 6px rgba(0,0,0,0.03);
+}
+.tool-card:hover::before {
+  transform: scaleX(1);
+}
+.tool-card:hover .tool-arrow {
+  transform: translateX(5px);
+  color: #0d6e63;
+}
+
+.tool-icon {
+  font-size: 28px;
+  margin-bottom: 14px;
+  line-height: 1;
+}
+.tool-title {
+  font-family: 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+  font-size: 17px;
+  font-weight: 500;
+  margin-bottom: 4px;
+  color: #1a2332;
+  letter-spacing: 0.02em;
+}
+.tool-en {
+  font-size: 10px;
+  color: #c4b8a4;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  font-weight: 500;
+}
+.tool-desc {
+  font-size: 12.5px;
+  color: #6b7280;
+  line-height: 1.85;
+  flex: 1;
+  margin-bottom: 16px;
+}
+.tool-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 0.5px solid #f1ede4;
+}
+.tool-tags {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+.tool-tag {
+  background: #f5f1e8;
+  color: #8b7e6b;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 3px;
+  letter-spacing: 0.04em;
+  font-weight: 500;
+}
+.tool-tag.ai { background: #f3eafe; color: #6d28d9; }
+.tool-tag.api { background: #fef3c7; color: #92400e; }
+.tool-tag.clinical { background: #e0f2f1; color: #0d6e63; }
+.tool-tag.new {
+  background: #0d6e63;
+  color: white;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+}
+.tool-arrow {
+  color: #cbd5e1;
+  font-size: 16px;
+  transition: all 0.22s;
+}
+
+/* ── Footer ──────────────────────────────── */
+.footer {
+  text-align: center;
+  margin-top: 4.5rem;
+  padding-top: 2rem;
+  border-top: 0.5px solid #d8d0c0;
+}
+.footer-ornament {
+  color: #c4b8a4;
+  font-size: 12px;
+  margin-bottom: 1.2rem;
+  letter-spacing: 0.4em;
+  font-family: 'Hiragino Mincho ProN', serif;
+}
+.footer p {
+  margin: 4px 0;
+  font-size: 11px;
+  color: #94a3b8;
+  letter-spacing: 0.04em;
+  line-height: 1.8;
+}
+.footer .copy {
+  margin-top: 1.5rem;
+  color: #c4b8a4;
+  font-family: 'Hiragino Mincho ProN', serif;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+}
+
+@media (max-width: 600px) {
+  .container { padding: 2.2rem 1rem 3rem; }
+  .hero { margin-bottom: 3rem; padding-bottom: 2rem; }
+  .hero-title { font-size: 24px; letter-spacing: 0.05em; }
+  .hero-subtitle { font-size: 10px; letter-spacing: 0.25em; }
+  .tool-grid { grid-template-columns: 1fr; gap: 10px; }
+  .tool-card { padding: 1.3rem 1.4rem 1.1rem; }
+  .category { margin-bottom: 2.3rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ────── Hero ────── -->
+  <header class="hero">
+    <div class="hero-ornament">✦ ✦ ✦</div>
+    <h1 class="hero-title">医療ツール集</h1>
+    <div class="hero-subtitle">Clinical Tools Library</div>
+    <p class="hero-desc">
+      内科・訪問診療の日々を少しだけ軽くするための、<br>
+      ブラウザだけで動く小さなツール集です。
+    </p>
+  </header>
+
+  <!-- ────── 01 在宅・訪問医療 ────── -->
+  <section class="category">
+    <div class="category-label">
+      <span><span class="category-num">01</span> 在宅・訪問医療</span>
+    </div>
+    <div class="tool-grid">
+
+      <a href="https://kunichandayo-design.github.io/houmon-scheduler/" class="tool-card">
+        <div class="tool-icon">🏠</div>
+        <div class="tool-title">訪問診療スケジューラー</div>
+        <div class="tool-en">VISIT SCHEDULE MANAGER</div>
+        <p class="tool-desc">
+          患者リスト・週次訪問予定・訪問記録を一画面で管理。Googleマップ連携、CSV一括取り込み対応。
+        </p>
+        <div class="tool-footer">
+          <div class="tool-tags">
+            <span class="tool-tag new">NEW</span>
+            <span class="tool-tag clinical">在宅</span>
+          </div>
+          <span class="tool-arrow">→</span>
+        </div>
+      </a>
+
+      <a href="https://kunichandayo-design.github.io/medical-doc-ai/" class="tool-card">
+        <div class="tool-icon">📝</div>
+        <div class="tool-title">文書ドラフトAI</div>
+        <div class="tool-en">AI DOCUMENT DRAFT</div>
+        <p class="tool-desc">
+          訪問看護指示書・診療情報提供書のドラフトをClaude AIが自動生成。フォーム入力からワンクリックで下書き完成。
+        </p>
+        <div class="tool-footer">
+          <div class="tool-tags">
+            <span class="tool-tag new">NEW</span>
+            <span class="tool-tag ai">AI</span>
+            <span class="tool-tag api">APIキー要</span>
+          </div>
+          <span class="tool-arrow">→</span>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- ────── 02 臨床リファレンス ────── -->
+  <section class="category">
+    <div class="category-label">
+      <span><span class="category-num">02</span> 臨床リファレンス</span>
+    </div>
+    <div class="tool-grid">
+
+      <a href="https://kunichandayo-design.github.io/pediatric-drug-calc/" class="tool-card">
+        <div class="tool-icon">💊</div>
+        <div class="tool-title">小児薬用量計算機</div>
+        <div class="tool-en">PEDIATRIC DRUG CALCULATOR</div>
+        <p class="tool-desc">
+          35剤以上の小児薬について、年齢・体重から推奨用量を即時計算。剤形別換算にも対応。
+        </p>
+        <div class="tool-footer">
+          <div class="tool-tags">
+            <span class="tool-tag clinical">小児</span>
+          </div>
+          <span class="tool-arrow">→</span>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- ────── 03 その他 ────── -->
+  <!-- ※ MBTIのURLは取得後にhref属性を更新してください -->
+  <section class="category">
+    <div class="category-label">
+      <span><span class="category-num">03</span> その他</span>
+    </div>
+    <div class="tool-grid">
+
+      <a href="#" class="tool-card">
+        <div class="tool-icon">🧠</div>
+        <div class="tool-title">MBTI診断</div>
+        <div class="tool-en">PERSONALITY TEST</div>
+        <p class="tool-desc">
+          16タイプの性格診断テスト。ブラウザだけで完結するスタンドアロン診断ツール。
+        </p>
+        <div class="tool-footer">
+          <div class="tool-tags">
+            <span class="tool-tag">趣味</span>
+          </div>
+          <span class="tool-arrow">→</span>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- ────── Footer ────── -->
+  <footer class="footer">
+    <div class="footer-ornament">✦</div>
+    <p>すべてのツールはブラウザ内（localStorage）でデータを保存します。</p>
+    <p>外部送信は「文書ドラフトAI」のみ（Anthropic APIへ）。</p>
+    <p class="copy">© <span id="year"></span> · KUNICHAN</p>
+  </footer>
+
+</div>
+
+<script>
+document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>
