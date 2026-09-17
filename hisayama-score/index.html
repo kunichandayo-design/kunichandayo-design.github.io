@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>久山町研究スコア・脂質異常症リスク評価 Webアプリ | 動脈硬化性疾患予防ガイドライン2022準拠</title>
+  <meta name="description" content="日本動脈硬化学会『動脈硬化性疾患予防ガイドライン2022年版』および九州大学久山町研究予測モデルに準拠。必須項目から冠動脈疾患・アテローム血栓性脳梗塞の10年発症確率と脂質管理目標値を即時判定。">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdfa',
+              500: '#14b8a6',
+              600: '#0d9488',
+              700: '#0f766e',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+JP:wght@400;500;700;900&display=swap');
+    body {
+      font-family: 'Inter', 'Noto Sans JP', sans-serif;
+    }
+    input[type=range] {
+      accent-color: #06b6d4;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen selection:bg-cyan-500 selection:text-black">
+
+  <!-- Navigation -->
+  <nav class="bg-slate-900/90 backdrop-blur-md px-4 sm:px-8 py-3.5 border-b border-slate-800 flex items-center justify-between sticky top-0 z-30 shadow-xl">
+    <div class="flex items-center gap-3">
+      <a href="../" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-all flex items-center gap-1.5 text-xs font-semibold" title="医療ツール集トップへ">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        <span class="hidden sm:inline">ツール集トップ</span>
+      </a>
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-slate-950 font-black text-lg shadow-md">
+        🫀
+      </div>
+      <div>
+        <span class="font-extrabold text-sm sm:text-base text-slate-100 tracking-tight block">
+          久山町研究スコア・脂質リスク評価
+        </span>
+        <span class="text-[11px] text-cyan-400 font-mono block -mt-0.5">
+          動脈硬化性疾患予防ガイドライン2022年版 準拠
+        </span>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button id="copyBtn" onclick="copySummary()" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 transition-all">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+        <span id="copyBtnText">結果をコピー</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Header & Presets -->
+    <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-slate-900/60 p-5 rounded-2xl border border-slate-800">
+      <div>
+        <h1 class="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
+          動脈硬化性心血管疾患 (ASCVD) 10年リスク評価
+        </h1>
+        <p class="text-sm text-slate-400 mt-1">
+          日本人データに基づく冠動脈疾患・アテローム血栓性脳梗塞の10年発症確率および動脈硬化学会管理目標値を瞬時に計算します。
+        </p>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="text-xs font-semibold text-slate-400 mr-1">プリセット:</span>
+        <button onclick="applyPreset('low')" class="px-2.5 py-1 text-xs rounded-lg bg-emerald-950/60 text-emerald-300 border border-emerald-800/40 hover:bg-emerald-900/80 transition-all">低リスク例</button>
+        <button onclick="applyPreset('moderate')" class="px-2.5 py-1 text-xs rounded-lg bg-yellow-950/60 text-yellow-300 border border-yellow-800/40 hover:bg-yellow-900/80 transition-all">中リスク例</button>
+        <button onclick="applyPreset('high')" class="px-2.5 py-1 text-xs rounded-lg bg-amber-950/60 text-amber-300 border border-amber-800/40 hover:bg-amber-900/80 transition-all">高リスク例</button>
+        <button onclick="applyPreset('secondary')" class="px-2.5 py-1 text-xs rounded-lg bg-rose-950/60 text-rose-300 border border-rose-800/40 hover:bg-rose-900/80 transition-all">二次予防例</button>
+      </div>
+    </div>
+
+    <!-- Secondary Prevention Toggle Banner -->
+    <div class="mb-6 p-4 rounded-xl border border-rose-900/40 bg-rose-950/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div class="flex items-start gap-3">
+        <div class="p-1 rounded-md bg-rose-900/40 text-rose-400 text-sm">⚠️</div>
+        <div>
+          <span class="text-sm font-bold text-rose-200">
+            冠動脈疾患（心筋梗塞・狭心症）やアテローム血栓性脳梗塞の既往がありますか？（二次予防）
+          </span>
+          <p class="text-xs text-rose-300/80 mt-0.5">
+            既往がある場合は一次予防スコアではなく、二次予防目標（LDL-C &lt;100 または &lt;70 mg/dL）が適用されます。
+          </p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" id="isSecondary" onchange="recalculate()" class="sr-only peer">
+          <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-600"></div>
+          <span id="secondaryLabel" class="ml-2 text-xs font-semibold text-rose-300">一次予防モード</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      
+      <!-- Left Column: Input Form (7 cols) -->
+      <div class="lg:col-span-7 space-y-6">
+        <div class="bg-slate-900/80 p-6 rounded-2xl border border-slate-800 shadow-xl space-y-6">
+          <h2 class="text-lg font-bold text-white flex items-center gap-2 border-b border-slate-800 pb-3">
+            <span>🩺</span> 必須入力項目（久山町研究スコア）
+          </h2>
+
+          <!-- Age & Sex -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">
+                年齢 <span class="text-cyan-400" id="ageValDisplay">(55歳)</span>
+              </label>
+              <div class="flex items-center gap-3">
+                <input type="range" id="age" min="40" max="85" value="55" oninput="syncAge(this.value)" class="w-full h-2 bg-slate-800 rounded-lg cursor-pointer">
+                <input type="number" id="ageNum" min="40" max="99" value="55" oninput="syncAge(this.value)" class="w-16 px-2 py-1 text-sm bg-slate-800 border border-slate-700 rounded-lg text-white font-mono text-center">
+              </div>
+              <span class="text-[11px] text-slate-500 block mt-1">※対象: 40〜79歳 (80歳以上は80歳代区分)</span>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">性別</label>
+              <div class="grid grid-cols-2 gap-2">
+                <button type="button" id="sexMaleBtn" onclick="setSex('male')" class="py-2 px-3 text-xs font-bold rounded-lg border border-cyan-500 bg-cyan-500/20 text-cyan-300 transition-all">
+                  男性 (+1点)
+                </button>
+                <button type="button" id="sexFemaleBtn" onclick="setSex('female')" class="py-2 px-3 text-xs font-bold rounded-lg border border-slate-700 bg-slate-800/60 text-slate-400 transition-all">
+                  女性 (+0点)
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- SBP -->
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <label class="text-xs font-semibold text-slate-300">
+                収縮期血圧（上の血圧）: <span id="sbpValDisplay" class="text-cyan-400 font-mono font-bold">135 mmHg</span>
+              </label>
+              <span id="sbpPointLabel" class="text-[11px] text-slate-400">130〜139 (+2点)</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <input type="range" id="sbp" min="90" max="200" step="1" value="135" oninput="syncSbp(this.value)" class="w-full h-2 bg-slate-800 rounded-lg cursor-pointer">
+              <input type="number" id="sbpNum" min="80" max="220" value="135" oninput="syncSbp(this.value)" class="w-20 px-2 py-1 text-sm bg-slate-800 border border-slate-700 rounded-lg text-white font-mono text-center">
+            </div>
+          </div>
+
+          <!-- Lipid Profiles Container -->
+          <div class="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80 space-y-4">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                <span>🩸</span> 血清脂質プロファイル
+              </span>
+              <div class="flex items-center text-xs bg-slate-800 p-0.5 rounded-lg border border-slate-700">
+                <button type="button" id="modeLdlBtn" onclick="setLipidMode('ldl')" class="px-2.5 py-0.5 rounded-md font-semibold bg-cyan-600 text-white transition-all">LDL-C</button>
+                <button type="button" id="modeNonHdlBtn" onclick="setLipidMode('nonHdl')" class="px-2.5 py-0.5 rounded-md font-semibold text-slate-400 transition-all">Non-HDL-C</button>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <!-- Primary Lipid (LDL or Non-HDL) -->
+              <div>
+                <div class="flex justify-between text-xs mb-1">
+                  <span id="lipidTypeLabel" class="text-slate-300 font-semibold">LDLコレステロール</span>
+                  <span id="primaryLipidDisplay" class="text-cyan-400 font-mono font-bold">145 mg/dL</span>
+                </div>
+                <input type="range" id="primaryLipid" min="60" max="240" value="145" oninput="syncPrimaryLipid(this.value)" class="w-full h-2 bg-slate-800 rounded-lg cursor-pointer">
+                <span id="primaryLipidPointLabel" class="text-[11px] text-slate-500 mt-1 block">140〜159 (+2点)</span>
+              </div>
+
+              <!-- HDL-C -->
+              <div>
+                <div class="flex justify-between text-xs mb-1">
+                  <span class="text-slate-300 font-semibold">HDLコレステロール</span>
+                  <span id="hdlDisplay" class="text-cyan-400 font-mono font-bold">45 mg/dL</span>
+                </div>
+                <input type="range" id="hdl" min="20" max="100" value="45" oninput="syncHdl(this.value)" class="w-full h-2 bg-slate-800 rounded-lg cursor-pointer">
+                <span id="hdlPointLabel" class="text-[11px] text-slate-500 mt-1 block">40〜59 (+1点)</span>
+              </div>
+            </div>
+
+            <!-- Triglycerides -->
+            <div class="pt-2 border-t border-slate-800/80">
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-xs text-slate-300 font-semibold">トリグリセライド (中性脂肪)</span>
+                <div class="flex items-center gap-2">
+                  <div class="flex items-center text-[11px] bg-slate-800 px-2 py-0.5 rounded border border-slate-700">
+                    <button type="button" id="tgFastingBtn" onclick="setTgTiming('fasting')" class="mr-2 font-semibold text-cyan-400">空腹時</button>
+                    <button type="button" id="tgCasualBtn" onclick="setTgTiming('casual')" class="font-semibold text-slate-400">随時</button>
+                  </div>
+                  <span id="tgDisplay" class="text-cyan-400 font-mono font-bold text-xs">160 mg/dL</span>
+                </div>
+              </div>
+              <input type="range" id="tg" min="40" max="500" value="160" oninput="syncTg(this.value)" class="w-full h-2 bg-slate-800 rounded-lg cursor-pointer">
+              <div class="flex justify-between text-[11px] text-slate-500 mt-1">
+                <span id="tgTargetInfo">目標: &lt;150 mg/dL</span>
+                <span id="tgStatusLabel" class="text-amber-400 font-semibold">⚠️ 高TG血症該当</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Toggles for Clinical Factors -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div id="dmCard" onclick="toggleCheckbox('hasDm')" class="p-3.5 rounded-xl border cursor-pointer transition-all flex items-center justify-between bg-slate-950/40 border-slate-800 text-slate-400 hover:border-slate-700">
+              <div>
+                <span class="text-xs font-bold block text-white">糖尿病 / 糖代謝異常</span>
+                <span class="text-[11px] text-slate-400">久山町スコア: +2点</span>
+              </div>
+              <input type="checkbox" id="hasDm" onchange="recalculate()" class="w-5 h-5 rounded border-slate-700 text-cyan-500 focus:ring-0 cursor-pointer">
+            </div>
+
+            <div id="proteinuriaCard" onclick="toggleCheckbox('hasProteinuria')" class="p-3.5 rounded-xl border cursor-pointer transition-all flex items-center justify-between bg-slate-950/40 border-slate-800 text-slate-400 hover:border-slate-700">
+              <div>
+                <span class="text-xs font-bold block text-white">尿蛋白 陽性 (1+以上)</span>
+                <span class="text-[11px] text-slate-400">久山町スコア: +3点</span>
+              </div>
+              <input type="checkbox" id="hasProteinuria" onchange="recalculate()" class="w-5 h-5 rounded border-slate-700 text-cyan-500 focus:ring-0 cursor-pointer">
+            </div>
+
+            <div id="smokerCard" onclick="toggleCheckbox('isSmoker')" class="p-3.5 rounded-xl border cursor-pointer transition-all flex items-center justify-between bg-slate-950/40 border-slate-800 text-slate-400 hover:border-slate-700">
+              <div>
+                <span class="text-xs font-bold block text-white">現在喫煙習慣あり</span>
+                <span class="text-[11px] text-slate-400">久山町スコア: +2点</span>
+              </div>
+              <input type="checkbox" id="isSmoker" onchange="recalculate()" class="w-5 h-5 rounded border-slate-700 text-cyan-500 focus:ring-0 cursor-pointer">
+            </div>
+
+            <div id="exerciseCard" onclick="toggleCheckbox('hasExercise')" class="p-3.5 rounded-xl border cursor-pointer transition-all flex items-center justify-between bg-slate-950/40 border-slate-800 text-slate-400 hover:border-slate-700">
+              <div>
+                <span class="text-xs font-bold block text-white">習慣的運動 (週1回以上)</span>
+                <span id="exerciseLabel" class="text-[11px] text-slate-400">あり (0点)</span>
+              </div>
+              <input type="checkbox" id="hasExercise" checked onchange="recalculate()" class="w-5 h-5 rounded border-slate-700 text-cyan-500 focus:ring-0 cursor-pointer">
+            </div>
+          </div>
+
+          <!-- Comorbidities -->
+          <div class="pt-2">
+            <div class="text-xs font-bold text-slate-300 mb-2 flex items-center gap-1.5">
+              <span>🛡️</span> ガイドライン自動高リスク合併症・詳細病態
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <label class="flex items-center gap-2 p-2 rounded-lg bg-slate-950/40 border border-slate-800 cursor-pointer text-xs">
+                <input type="checkbox" id="hasCkd" onchange="recalculate()" class="rounded border-slate-700 text-cyan-500 focus:ring-0">
+                <span class="text-slate-300">CKD (慢性腎臓病)</span>
+              </label>
+              <label class="flex items-center gap-2 p-2 rounded-lg bg-slate-950/40 border border-slate-800 cursor-pointer text-xs">
+                <input type="checkbox" id="hasPad" onchange="recalculate()" class="rounded border-slate-700 text-cyan-500 focus:ring-0">
+                <span class="text-slate-300">末梢動脈疾患 (PAD)</span>
+              </label>
+              <label class="flex items-center gap-2 p-2 rounded-lg bg-slate-950/40 border border-slate-800 cursor-pointer text-xs">
+                <input type="checkbox" id="hasDmComplications" onchange="recalculate()" class="rounded border-slate-700 text-cyan-500 focus:ring-0">
+                <span class="text-slate-300">糖尿病細小血管症</span>
+              </label>
+            </div>
+            <div id="extremeSecondaryContainer" class="hidden mt-2 p-2.5 rounded-lg bg-rose-950/30 border border-rose-900/40">
+              <label class="flex items-center gap-2 cursor-pointer text-xs">
+                <input type="checkbox" id="isExtremeSecondary" onchange="recalculate()" class="rounded border-rose-700 text-rose-500 focus:ring-0">
+                <span class="text-rose-200 font-bold">極高リスク病態（ACS、家族性高コレステロール血症、脳心重複など）</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Results & Clinical Strategy (5 cols) -->
+      <div class="lg:col-span-5 space-y-6">
+        <div class="bg-gradient-to-b from-slate-900 to-slate-950 p-6 rounded-2xl border border-slate-800 shadow-2xl relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+          <!-- Header Badge -->
+          <div class="flex items-center justify-between mb-4">
+            <span id="resultHeaderType" class="text-xs font-bold tracking-wider uppercase text-slate-400">
+              久山町研究 10年リスク評価
+            </span>
+            <span id="tierBadge" class="px-3 py-1 rounded-full text-xs font-extrabold border shadow-sm bg-yellow-500/20 text-yellow-300 border-yellow-500/30">
+              中リスク
+            </span>
+          </div>
+
+          <!-- Probability Display -->
+          <div id="probabilityBox" class="mb-6 p-4 rounded-xl bg-slate-950/80 border border-slate-800/80 text-center">
+            <span class="text-xs text-slate-400 font-semibold block">
+              動脈硬化性疾患（心筋梗塞・アテローム脳梗塞）
+            </span>
+            <div class="flex items-baseline justify-center gap-2 mt-1">
+              <span id="probPercentDisplay" class="text-4xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-teal-300 to-emerald-400 font-mono tracking-tight">
+                3.4
+              </span>
+              <span class="text-xl font-bold text-slate-400">%</span>
+            </div>
+            <span class="text-xs text-slate-500 block mt-1">
+              今後10年間の発症確率 (合計スコア: <span id="totalScoreDisplay" class="font-mono text-cyan-300">11点</span>)
+            </span>
+
+            <div class="w-full bg-slate-800 h-2.5 rounded-full mt-3 overflow-hidden">
+              <div id="probBar" class="h-full rounded-full bg-gradient-to-r from-cyan-500 to-yellow-500 transition-all duration-500" style="width: 25%"></div>
+            </div>
+            <div class="flex justify-between text-[10px] text-slate-500 mt-1">
+              <span>低リスク (&lt;2%)</span>
+              <span>中リスク (2〜10%)</span>
+              <span>高リスク (≧10%)</span>
+            </div>
+          </div>
+
+          <!-- Lipid Targets Cards -->
+          <div class="space-y-3 mb-6">
+            <span class="text-xs font-bold text-slate-300 flex items-center gap-1">
+              <span>🎯</span> ガイドライン脂質管理目標値 (mg/dL)
+            </span>
+
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <!-- LDL Target -->
+              <div id="targetLdlCard" class="p-3 rounded-xl border bg-slate-950/60 border-slate-800">
+                <div class="flex justify-between items-center mb-1">
+                  <span class="font-bold">LDL-C</span>
+                  <span id="targetLdlBadge" class="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-slate-900/60">未達</span>
+                </div>
+                <div id="targetLdlVal" class="text-lg font-black font-mono">&lt; 140</div>
+                <div id="currentLdlVal" class="text-[11px] text-slate-400 mt-0.5">現在: 145 mg/dL</div>
+              </div>
+
+              <!-- Non-HDL Target -->
+              <div class="p-3 rounded-xl border bg-slate-950/60 border-slate-800 text-slate-300">
+                <div class="flex justify-between items-center mb-1">
+                  <span class="font-bold">Non-HDL-C</span>
+                  <span class="text-[10px] font-mono text-slate-400">LDL+30</span>
+                </div>
+                <div id="targetNonHdlVal" class="text-lg font-black font-mono text-cyan-300">&lt; 170</div>
+                <div id="currentNonHdlVal" class="text-[11px] text-slate-400 mt-0.5">現在: 175 mg/dL</div>
+              </div>
+
+              <!-- TG Target -->
+              <div id="targetTgCard" class="p-3 rounded-xl border bg-slate-950/60 border-slate-800">
+                <div class="flex justify-between items-center mb-1">
+                  <span class="font-bold">TG</span>
+                  <span id="targetTgBadge" class="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-slate-900/60">高値</span>
+                </div>
+                <div id="targetTgVal" class="text-lg font-black font-mono">&lt; 150</div>
+                <div id="currentTgVal" class="text-[11px] text-slate-400 mt-0.5">現在: 160 mg/dL</div>
+              </div>
+
+              <!-- HDL Target -->
+              <div id="targetHdlCard" class="p-3 rounded-xl border bg-slate-950/60 border-slate-800">
+                <div class="flex justify-between items-center mb-1">
+                  <span class="font-bold">HDL-C</span>
+                  <span id="targetHdlBadge" class="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-slate-900/60">正常</span>
+                </div>
+                <div class="text-lg font-black font-mono">≧ 40</div>
+                <div id="currentHdlVal" class="text-[11px] text-slate-400 mt-0.5">現在: 45 mg/dL</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recommendations -->
+          <div class="p-4 rounded-xl bg-cyan-950/30 border border-cyan-800/40 mb-6">
+            <span class="text-xs font-bold text-cyan-300 block mb-1">臨床推奨方針</span>
+            <p id="urgencyText" class="text-xs text-slate-200 leading-relaxed font-medium">
+              3〜6ヶ月の生活習慣改善を実施し、未達成の場合は薬物療法を考慮します。
+            </p>
+            <p id="descText" class="text-[11px] text-slate-400 mt-2">
+              10年発症確率が2.0%〜10.0%未満の中等度リスク群です。
+            </p>
+          </div>
+
+          <!-- Risk Reduction Simulator -->
+          <div id="simContainer" class="p-4 rounded-xl bg-slate-950/90 border border-slate-800">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold text-emerald-400 flex items-center gap-1">
+                <span>📉</span> 生活習慣改善シミュレーター
+              </span>
+              <span id="simDiffBadge" class="text-xs font-mono font-black text-emerald-300 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800/60 hidden">
+                -0.0% 改善
+              </span>
+            </div>
+            <p class="text-[11px] text-slate-400 mb-3">生活習慣を是正した場合の推定発症確率の変化：</p>
+            <div class="space-y-2 text-xs">
+              <label id="simSmokingRow" class="flex items-center justify-between cursor-pointer p-2 rounded-lg bg-slate-900 border border-slate-800">
+                <span class="text-slate-300">禁煙する</span>
+                <input type="checkbox" id="simQuitSmoking" onchange="runSimulation()" class="rounded text-emerald-500 focus:ring-0">
+              </label>
+              <label id="simSbpRow" class="flex items-center justify-between cursor-pointer p-2 rounded-lg bg-slate-900 border border-slate-800">
+                <span class="text-slate-300">血圧を125 mmHg以下に管理</span>
+                <input type="checkbox" id="simLowerSbp" onchange="runSimulation()" class="rounded text-emerald-500 focus:ring-0">
+              </label>
+              <label id="simExerciseRow" class="flex items-center justify-between cursor-pointer p-2 rounded-lg bg-slate-900 border border-slate-800">
+                <span class="text-slate-300">週1回以上の運動習慣を開始</span>
+                <input type="checkbox" id="simAddExercise" onchange="runSimulation()" class="rounded text-emerald-500 focus:ring-0">
+              </label>
+            </div>
+            <div id="simResultRow" class="hidden mt-3 pt-3 border-t border-slate-800 flex items-center justify-between">
+              <span class="text-xs text-slate-400">改善後の推定発症確率:</span>
+              <span id="simResultPercent" class="text-base font-mono font-black text-emerald-400">0.0%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Formula Breakdown Accordion -->
+        <div class="bg-slate-900/60 rounded-xl border border-slate-800 p-4">
+          <button onclick="toggleDetails()" class="w-full flex items-center justify-between text-xs font-semibold text-slate-300 hover:text-white">
+            <span class="flex items-center gap-1.5">
+              <span>ℹ️</span> 久山町スコア内訳・計算ロジック
+            </span>
+            <span id="detailsToggleIcon">▼</span>
+          </button>
+          <div id="detailsContent" class="hidden mt-4 pt-3 border-t border-slate-800 text-xs text-slate-400 space-y-2 font-mono">
+            <div class="grid grid-cols-2 gap-1 bg-slate-950 p-2.5 rounded-lg border border-slate-800/80">
+              <div>年齢点数: <span id="bAge" class="text-cyan-300">+5点</span></div>
+              <div>性別点数: <span id="bSex" class="text-cyan-300">+1点</span></div>
+              <div>収縮期血圧: <span id="bSbp" class="text-cyan-300">+2点</span></div>
+              <div>脂質点数: <span id="bLipid" class="text-cyan-300">+2点</span></div>
+              <div>HDL点数: <span id="bHdl" class="text-cyan-300">+1点</span></div>
+              <div>糖尿病: <span id="bDm" class="text-cyan-300">+0点</span></div>
+              <div>尿蛋白: <span id="bProteinuria" class="text-cyan-300">+0点</span></div>
+              <div>喫煙: <span id="bSmoker" class="text-cyan-300">+0点</span></div>
+              <div>運動不足: <span id="bExercise" class="text-cyan-300">+0点</span></div>
+              <div class="col-span-2 pt-1 mt-1 border-t border-slate-800 font-bold text-white">
+                合計スコア: <span id="bTotal" class="text-cyan-400">11点</span>
+              </div>
+            </div>
+            <p class="text-[10px] text-slate-500 font-sans leading-relaxed">
+              予測式: P = 1 - 0.9696^(exp(TotalScore × 0.144 - 2.4767))<br>
+              （Honda T, et al. J Atheroscler Thromb 2022; 29: 345-361）
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Clinical Guidelines Footer Section -->
+    <div class="mt-12 bg-slate-900/60 p-6 sm:p-8 rounded-2xl border border-slate-800 space-y-6">
+      <div class="flex items-center gap-3">
+        <div class="p-2 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 text-lg">
+          📄
+        </div>
+        <div>
+          <h3 class="text-base sm:text-lg font-bold text-white">
+            日本動脈硬化学会 2022年版 推奨治療アプローチ
+          </h3>
+          <p class="text-xs text-slate-400">
+            生活習慣の是正とリスク階層に応じた薬物療法のステップ
+          </p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs text-slate-300 leading-relaxed">
+        <div class="p-4 rounded-xl bg-slate-950/60 border border-slate-800 space-y-2">
+          <span class="font-bold text-cyan-300 block text-sm">① 食事療法（The Japan Diet）</span>
+          <ul class="list-disc list-inside space-y-1 text-slate-400">
+            <li>飽和脂肪酸・トランス脂肪酸の摂取制限</li>
+            <li>コレステロール摂取制限（高LDL時は200mg/日未満）</li>
+            <li>食物繊維・大豆製品・海藻類の積極的摂取</li>
+            <li>青魚（EPA/DHAなどn-3系不飽和脂肪酸）の摂取</li>
+            <li>適正体重維持（BMI 22〜25目標）と節酒</li>
+          </ul>
+        </div>
+
+        <div class="p-4 rounded-xl bg-slate-950/60 border border-slate-800 space-y-2">
+          <span class="font-bold text-emerald-300 block text-sm">② 運動療法・完全禁煙</span>
+          <ul class="list-disc list-inside space-y-1 text-slate-400">
+            <li>中強度以上の有酸素運動（速歩、サイクリング等）</li>
+            <li>1回30分以上、週3回以上（または合計週150分以上）</li>
+            <li>完全禁煙（受動喫煙防止も含む）</li>
+            <li>レジスタンストレーニングの併用（週2〜3日）</li>
+          </ul>
+        </div>
+
+        <div class="p-4 rounded-xl bg-slate-950/60 border border-slate-800 space-y-2">
+          <span class="font-bold text-amber-300 block text-sm">③ 薬物療法の基本方針</span>
+          <ul class="list-disc list-inside space-y-1 text-slate-400">
+            <li><strong class="text-white">スタチン</strong>: 高LDL-C血症の第一選択薬</li>
+            <li><strong class="text-white">エゼチミブ</strong>: スタチン併用で相乗的な低下</li>
+            <li><strong class="text-white">PCSK9阻害薬 / レクビオ</strong>: 重度高LDL・極高リスク群への適応（年2回注射製剤など）</li>
+            <li><strong class="text-white">ペマフィブラート</strong>: 高TG血症に対する安全性の高い選択肢</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="p-3 bg-slate-950/80 rounded-xl border border-slate-800 text-[11px] text-slate-400 flex items-start gap-2">
+        <span class="text-cyan-400">ℹ️</span>
+        <span>
+          ※本ツールは日本動脈硬化学会『動脈硬化性疾患予防ガイドライン2022年版』および久山町研究予測モデルに基づき設計されています。実際の診療・処方においては、患者の個別病態や合併症、臨床検査所見を総合的に考慮して医師が判断します。
+        </span>
+      </div>
+    </div>
+  </main>
+
+  <!-- Script Logic -->
+  <script>
+    let state = {
+      age: 55,
+      sex: 'male',
+      sbp: 135,
+      lipidMode: 'ldl',
+      ldl: 145,
+      nonHdl: 175,
+      hdl: 45,
+      tg: 160,
+      tgTiming: 'fasting',
+      hasDm: false,
+      hasProteinuria: false,
+      isSmoker: false,
+      hasExercise: true,
+      isSecondary: false,
+      isExtremeSecondary: false,
+      hasCkd: false,
+      hasPad: false,
+      hasDmComplications: false
+    };
+
+    function setSex(val) {
+      state.sex = val;
+      const maleBtn = document.getElementById('sexMaleBtn');
+      const femaleBtn = document.getElementById('sexFemaleBtn');
+      if (val === 'male') {
+        maleBtn.className = "py-2 px-3 text-xs font-bold rounded-lg border border-cyan-500 bg-cyan-500/20 text-cyan-300 transition-all";
+        femaleBtn.className = "py-2 px-3 text-xs font-bold rounded-lg border border-slate-700 bg-slate-800/60 text-slate-400 transition-all";
+      } else {
+        femaleBtn.className = "py-2 px-3 text-xs font-bold rounded-lg border border-pink-500 bg-pink-500/20 text-pink-300 transition-all";
+        maleBtn.className = "py-2 px-3 text-xs font-bold rounded-lg border border-slate-700 bg-slate-800/60 text-slate-400 transition-all";
+      }
+      recalculate();
+    }
+
+    function setLipidMode(mode) {
+      state.lipidMode = mode;
+      const ldlBtn = document.getElementById('modeLdlBtn');
+      const nonHdlBtn = document.getElementById('modeNonHdlBtn');
+      const label = document.getElementById('lipidTypeLabel');
+      const input = document.getElementById('primaryLipid');
+
+      if (mode === 'ldl') {
+        ldlBtn.className = "px-2.5 py-0.5 rounded-md font-semibold bg-cyan-600 text-white transition-all";
+        nonHdlBtn.className = "px-2.5 py-0.5 rounded-md font-semibold text-slate-400 transition-all";
+        label.textContent = "LDLコレステロール";
+        input.min = 60; input.max = 240; input.value = state.ldl;
+      } else {
+        nonHdlBtn.className = "px-2.5 py-0.5 rounded-md font-semibold bg-cyan-600 text-white transition-all";
+        ldlBtn.className = "px-2.5 py-0.5 rounded-md font-semibold text-slate-400 transition-all";
+        label.textContent = "Non-HDLコレステロール";
+        input.min = 80; input.max = 260; input.value = state.nonHdl;
+      }
+      syncPrimaryLipid(input.value);
+    }
+
+    function setTgTiming(timing) {
+      state.tgTiming = timing;
+      const fBtn = document.getElementById('tgFastingBtn');
+      const cBtn = document.getElementById('tgCasualBtn');
+      if (timing === 'fasting') {
+        fBtn.className = "mr-2 font-semibold text-cyan-400";
+        cBtn.className = "font-semibold text-slate-400";
+      } else {
+        cBtn.className = "mr-2 font-semibold text-cyan-400";
+        fBtn.className = "font-semibold text-slate-400";
+      }
+      recalculate();
+    }
+
+    function syncAge(v) {
+      state.age = parseInt(v) || 40;
+      document.getElementById('age').value = state.age;
+      document.getElementById('ageNum').value = state.age;
+      document.getElementById('ageValDisplay').textContent = `(${state.age}歳)`;
+      recalculate();
+    }
+
+    function syncSbp(v) {
+      state.sbp = parseInt(v) || 120;
+      document.getElementById('sbp').value = state.sbp;
+      document.getElementById('sbpNum').value = state.sbp;
+      document.getElementById('sbpValDisplay').textContent = `${state.sbp} mmHg`;
+      let pText = state.sbp < 120 ? "<120 (+0点)" : state.sbp < 130 ? "120〜129 (+1点)" : state.sbp < 140 ? "130〜139 (+2点)" : state.sbp < 160 ? "140〜159 (+3点)" : "≧160 (+4点)";
+      document.getElementById('sbpPointLabel').textContent = pText;
+      recalculate();
+    }
+
+    function syncPrimaryLipid(v) {
+      const val = parseInt(v) || 100;
+      if (state.lipidMode === 'ldl') {
+        state.ldl = val;
+        document.getElementById('primaryLipidDisplay').textContent = `${state.ldl} mg/dL`;
+        let pText = state.ldl < 120 ? "<120 (+0点)" : state.ldl < 140 ? "120〜139 (+1点)" : state.ldl < 160 ? "140〜159 (+2点)" : "≧160 (+3点)";
+        document.getElementById('primaryLipidPointLabel').textContent = pText;
+      } else {
+        state.nonHdl = val;
+        document.getElementById('primaryLipidDisplay').textContent = `${state.nonHdl} mg/dL`;
+        let pText = state.nonHdl < 150 ? "<150 (+0点)" : state.nonHdl < 170 ? "150〜169 (+1点)" : state.nonHdl < 190 ? "170〜189 (+2点)" : "≧190 (+3点)";
+        document.getElementById('primaryLipidPointLabel').textContent = pText;
+      }
+      recalculate();
+    }
+
+    function syncHdl(v) {
+      state.hdl = parseInt(v) || 40;
+      document.getElementById('hdlDisplay').textContent = `${state.hdl} mg/dL`;
+      let pText = state.hdl >= 60 ? "≧60 (+0点)" : state.hdl >= 40 ? "40〜59 (+1点)" : "<40 (+2点: 低HDL血症)";
+      document.getElementById('hdlPointLabel').textContent = pText;
+      recalculate();
+    }
+
+    function syncTg(v) {
+      state.tg = parseInt(v) || 100;
+      document.getElementById('tgDisplay').textContent = `${state.tg} mg/dL`;
+      recalculate();
+    }
+
+    function toggleCheckbox(id) {
+      const el = document.getElementById(id);
+      el.checked = !el.checked;
+      recalculate();
+    }
+
+    function toggleDetails() {
+      const content = document.getElementById('detailsContent');
+      const icon = document.getElementById('detailsToggleIcon');
+      if (content.classList.contains('hidden')) {
+        content.classList.remove('hidden');
+        icon.textContent = '▲';
+      } else {
+        content.classList.add('hidden');
+        icon.textContent = '▼';
+      }
+    }
+
+    function calculateScore(age, sex, sbp, mode, ldl, nonHdl, hdl, dm, proteinuria, smoker, exercise) {
+      let ageP = age < 50 ? 0 : age < 60 ? 5 : age < 70 ? 11 : age < 80 ? 16 : 20;
+      let sexP = sex === 'male' ? 1 : 0;
+      let sbpP = sbp < 120 ? 0 : sbp < 130 ? 1 : sbp < 140 ? 2 : sbp < 160 ? 3 : 4;
+      let lipidP = 0;
+      if (mode === 'ldl') {
+        lipidP = ldl < 120 ? 0 : ldl < 140 ? 1 : ldl < 160 ? 2 : 3;
+      } else {
+        lipidP = nonHdl < 150 ? 0 : nonHdl < 170 ? 1 : nonHdl < 190 ? 2 : 3;
+      }
+      let hdlP = hdl >= 60 ? 0 : hdl >= 40 ? 1 : 2;
+      let dmP = dm ? 2 : 0;
+      let protP = proteinuria ? 3 : 0;
+      let smokerP = smoker ? 2 : 0;
+      let exP = exercise ? 0 : 1;
+
+      let total = ageP + sexP + sbpP + lipidP + hdlP + dmP + protP + smokerP + exP;
+      let prob = (1 - Math.pow(0.9696, Math.exp(total * 0.144 - 2.4767))) * 100;
+      prob = Math.max(0.1, Math.min(99.9, prob));
+
+      return { total, ageP, sexP, sbpP, lipidP, hdlP, dmP, protP, smokerP, exP, prob };
+    }
+
+    function recalculate() {
+      // Sync form states
+      state.isSecondary = document.getElementById('isSecondary').checked;
+      state.hasDm = document.getElementById('hasDm').checked;
+      state.hasProteinuria = document.getElementById('hasProteinuria').checked;
+      state.isSmoker = document.getElementById('isSmoker').checked;
+      state.hasExercise = document.getElementById('hasExercise').checked;
+      state.hasCkd = document.getElementById('hasCkd').checked;
+      state.hasPad = document.getElementById('hasPad').checked;
+      state.hasDmComplications = document.getElementById('hasDmComplications').checked;
+      state.isExtremeSecondary = document.getElementById('isExtremeSecondary').checked;
+
+      // Update secondary container & label
+      document.getElementById('secondaryLabel').textContent = state.isSecondary ? '二次予防モード' : '一次予防モード';
+      const extCont = document.getElementById('extremeSecondaryContainer');
+      if (state.isSecondary) {
+        extCont.classList.remove('hidden');
+      } else {
+        extCont.classList.add('hidden');
+      }
+
+      // Exercise label
+      document.getElementById('exerciseLabel').textContent = state.hasExercise ? 'あり (週1回以上: 0点)' : 'なし (+1点)';
+
+      // Calculate primary score
+      const res = calculateScore(
+        state.age, state.sex, state.sbp, state.lipidMode,
+        state.ldl, state.nonHdl, state.hdl,
+        state.hasDm, state.hasProteinuria, state.isSmoker, state.hasExercise
+      );
+
+      // Breakdown update
+      document.getElementById('bAge').textContent = `+${res.ageP}点`;
+      document.getElementById('bSex').textContent = `+${res.sexP}点`;
+      document.getElementById('bSbp').textContent = `+${res.sbpP}点`;
+      document.getElementById('bLipid').textContent = `+${res.lipidP}点`;
+      document.getElementById('bHdl').textContent = `+${res.hdlP}点`;
+      document.getElementById('bDm').textContent = `+${res.dmP}点`;
+      document.getElementById('bProteinuria').textContent = `+${res.protP}点`;
+      document.getElementById('bSmoker').textContent = `+${res.smokerP}点`;
+      document.getElementById('bExercise').textContent = `+${res.exP}点`;
+      document.getElementById('bTotal').textContent = `${res.total}点`;
+      document.getElementById('totalScoreDisplay').textContent = `${res.total}点`;
+
+      // Probability display
+      document.getElementById('probPercentDisplay').textContent = res.prob.toFixed(1);
+      document.getElementById('probBar').style.width = `${Math.min(res.prob * 3, 100)}%`;
+
+      // Determine Risk Category & Targets
+      let tier = '低リスク';
+      let badgeClass = 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
+      let ldlTarget = 160;
+      let nonHdlTarget = 190;
+      let urgency = '食事療法・運動習慣・禁煙などの生活習慣改善が治療の中心となります。';
+      let desc = '10年発症確率が2.0%未満の低リスク群です。';
+
+      if (state.isSecondary) {
+        document.getElementById('resultHeaderType').textContent = '二次予防 判定結果';
+        if (state.isExtremeSecondary || state.hasDm) {
+          tier = '極高リスク（二次予防）';
+          badgeClass = 'bg-rose-500/20 text-rose-300 border-rose-500/40';
+          ldlTarget = 70;
+          nonHdlTarget = 100;
+          urgency = '高強度スタチンを直ちに開始・併用（エゼチミブやPCSK9阻害薬を視野）';
+          desc = '急性冠症候群(ACS)、家族性高コレステロール血症、糖尿病合併、または脳梗塞・心筋梗塞重複例などの極高リスク病態です。';
+        } else {
+          tier = '二次予防';
+          badgeClass = 'bg-rose-500/20 text-rose-300 border-rose-500/30';
+          ldlTarget = 100;
+          nonHdlTarget = 130;
+          urgency = '再発防止のため、薬物療法（スタチン）による厳格なLDL-C低下が不可欠です。';
+          desc = '冠動脈疾患またはアテローム血栓性脳梗塞の既往がある二次予防群です。';
+        }
+      } else {
+        document.getElementById('resultHeaderType').textContent = '久山町研究 10年リスク評価';
+        const isAutoHigh = state.hasDm || state.hasCkd || state.hasPad;
+        if (state.hasDm && (state.hasDmComplications || state.isSmoker || state.hasPad)) {
+          tier = '高リスク（糖尿病特定群）';
+          badgeClass = 'bg-red-500/20 text-red-300 border-red-500/30';
+          ldlTarget = 100;
+          nonHdlTarget = 130;
+          urgency = '一次予防ですが厳格なLDL-C < 100 mg/dLの達成が必要です。';
+          desc = '糖尿病に加え、細小血管症（腎症・網膜症）や喫煙など他の主要危険因子が重複しています。';
+        } else if (isAutoHigh || res.prob >= 10.0) {
+          tier = '高リスク';
+          badgeClass = 'bg-amber-500/20 text-amber-300 border-amber-500/30';
+          ldlTarget = 120;
+          nonHdlTarget = 150;
+          urgency = '生活習慣改善と並行し、早期の薬物療法（スタチン）導入が推奨されます。';
+          desc = isAutoHigh ? '糖尿病、CKD、PADなどのハイリスク病態を合併しているため高リスクに分類されます。' : '10年発症確率が10%以上の高リスク群です。';
+        } else if (res.prob >= 2.0) {
+          tier = '中リスク';
+          badgeClass = 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30';
+          ldlTarget = 140;
+          nonHdlTarget = 170;
+          urgency = '3〜6ヶ月の生活習慣改善を実施し、未達成の場合は薬物療法を考慮します。';
+          desc = '10年発症確率が2.0%〜10.0%未満の中等度リスク群です。';
+        }
+      }
+
+      // Render Badge & Target Values
+      const badge = document.getElementById('tierBadge');
+      badge.textContent = tier;
+      badge.className = `px-3 py-1 rounded-full text-xs font-extrabold border shadow-sm ${badgeClass}`;
+
+      document.getElementById('targetLdlVal').textContent = `< ${ldlTarget}`;
+      document.getElementById('currentLdlVal').textContent = `現在: ${state.ldl} mg/dL`;
+      document.getElementById('targetNonHdlVal').textContent = `< ${nonHdlTarget}`;
+      document.getElementById('currentNonHdlVal').textContent = `現在: ${state.nonHdl} mg/dL`;
+
+      // Check LDL achievement
+      const isLdlAchieved = state.lipidMode === 'ldl' ? state.ldl < ldlTarget : state.nonHdl < nonHdlTarget;
+      const ldlCard = document.getElementById('targetLdlCard');
+      const ldlBadge = document.getElementById('targetLdlBadge');
+      if (isLdlAchieved) {
+        ldlCard.className = "p-3 rounded-xl border bg-emerald-950/30 border-emerald-500/40 text-emerald-200";
+        ldlBadge.textContent = "達成";
+      } else {
+        ldlCard.className = "p-3 rounded-xl border bg-rose-950/30 border-rose-500/40 text-rose-200";
+        ldlBadge.textContent = "未達";
+      }
+
+      // Check TG achievement
+      const tgTarget = state.tgTiming === 'fasting' ? 150 : 175;
+      const isTgAchieved = state.tg < tgTarget;
+      document.getElementById('targetTgVal').textContent = `< ${tgTarget}`;
+      document.getElementById('currentTgVal').textContent = `現在: ${state.tg} mg/dL (${state.tgTiming === 'fasting' ? '空腹' : '随時'})`;
+      document.getElementById('tgTargetInfo').textContent = `目標: <${tgTarget} mg/dL`;
+      document.getElementById('tgStatusLabel').textContent = isTgAchieved ? '正常範囲' : '⚠️ 高TG血症該当';
+      document.getElementById('tgStatusLabel').className = isTgAchieved ? 'text-slate-500' : 'text-amber-400 font-semibold';
+
+      const tgCard = document.getElementById('targetTgCard');
+      const tgBadge = document.getElementById('targetTgBadge');
+      if (isTgAchieved) {
+        tgCard.className = "p-3 rounded-xl border bg-emerald-950/30 border-emerald-500/40 text-emerald-200";
+        tgBadge.textContent = "良好";
+      } else {
+        tgCard.className = "p-3 rounded-xl border bg-amber-950/30 border-amber-500/40 text-amber-200";
+        tgBadge.textContent = "高値";
+      }
+
+      // Check HDL achievement
+      const isHdlAchieved = state.hdl >= 40;
+      document.getElementById('currentHdlVal').textContent = `現在: ${state.hdl} mg/dL`;
+      const hdlCard = document.getElementById('targetHdlCard');
+      const hdlBadge = document.getElementById('targetHdlBadge');
+      if (isHdlAchieved) {
+        hdlCard.className = "p-3 rounded-xl border bg-emerald-950/30 border-emerald-500/40 text-emerald-200";
+        hdlBadge.textContent = "正常";
+      } else {
+        hdlCard.className = "p-3 rounded-xl border bg-rose-950/30 border-rose-500/40 text-rose-200";
+        hdlBadge.textContent = "低値";
+      }
+
+      // Recommendation texts
+      document.getElementById('urgencyText').textContent = urgency;
+      document.getElementById('descText').textContent = desc;
+
+      // Update Simulator Options
+      updateSimulator(res.prob);
+    }
+
+    function updateSimulator(currentProb) {
+      const simCont = document.getElementById('simContainer');
+      if (state.isSecondary) {
+        simCont.classList.add('hidden');
+        return;
+      }
+      simCont.classList.remove('hidden');
+
+      const sRow = document.getElementById('simSmokingRow');
+      const bpRow = document.getElementById('simSbpRow');
+      const exRow = document.getElementById('simExerciseRow');
+
+      if (state.isSmoker) sRow.classList.remove('hidden'); else sRow.classList.add('hidden');
+      if (state.sbp >= 130) bpRow.classList.remove('hidden'); else bpRow.classList.add('hidden');
+      if (!state.hasExercise) exRow.classList.remove('hidden'); else exRow.classList.add('hidden');
+
+      runSimulation();
+    }
+
+    function runSimulation() {
+      const qSmk = document.getElementById('simQuitSmoking').checked;
+      const lSbp = document.getElementById('simLowerSbp').checked;
+      const aEx = document.getElementById('simAddExercise').checked;
+
+      const baseRes = calculateScore(
+        state.age, state.sex, state.sbp, state.lipidMode,
+        state.ldl, state.nonHdl, state.hdl,
+        state.hasDm, state.hasProteinuria, state.isSmoker, state.hasExercise
+      );
+
+      const simRes = calculateScore(
+        state.age, state.sex,
+        lSbp ? Math.min(state.sbp, 125) : state.sbp,
+        state.lipidMode, state.ldl, state.nonHdl, state.hdl,
+        state.hasDm, state.hasProteinuria,
+        qSmk ? false : state.isSmoker,
+        aEx ? true : state.hasExercise
+      );
+
+      const diff = baseRes.prob - simRes.prob;
+      const diffBadge = document.getElementById('simDiffBadge');
+      const resRow = document.getElementById('simResultRow');
+      const resPercent = document.getElementById('simResultPercent');
+
+      if ((qSmk && state.isSmoker) || (lSbp && state.sbp >= 130) || (aEx && !state.hasExercise)) {
+        diffBadge.classList.remove('hidden');
+        diffBadge.textContent = `-${diff.toFixed(1)}% 改善`;
+        resRow.classList.remove('hidden');
+        resPercent.textContent = `${simRes.prob.toFixed(1)}%`;
+      } else {
+        diffBadge.classList.add('hidden');
+        resRow.classList.add('hidden');
+      }
+    }
+
+    function applyPreset(key) {
+      if (key === 'low') {
+        state.age = 45; setSex('female'); syncSbp(118);
+        setLipidMode('ldl'); state.ldl = 125; syncPrimaryLipid(125);
+        syncHdl(58); syncTg(110);
+        document.getElementById('hasDm').checked = false;
+        document.getElementById('hasProteinuria').checked = false;
+        document.getElementById('isSmoker').checked = false;
+        document.getElementById('hasExercise').checked = true;
+        document.getElementById('isSecondary').checked = false;
+        document.getElementById('isExtremeSecondary').checked = false;
+        document.getElementById('hasCkd').checked = false;
+        document.getElementById('hasPad').checked = false;
+        document.getElementById('hasDmComplications').checked = false;
+      } else if (key === 'moderate') {
+        state.age = 56; setSex('male'); syncSbp(138);
+        setLipidMode('ldl'); state.ldl = 148; syncPrimaryLipid(148);
+        syncHdl(44); syncTg(165);
+        document.getElementById('hasDm').checked = false;
+        document.getElementById('hasProteinuria').checked = false;
+        document.getElementById('isSmoker').checked = true;
+        document.getElementById('hasExercise').checked = false;
+        document.getElementById('isSecondary').checked = false;
+        document.getElementById('isExtremeSecondary').checked = false;
+        document.getElementById('hasCkd').checked = false;
+        document.getElementById('hasPad').checked = false;
+        document.getElementById('hasDmComplications').checked = false;
+      } else if (key === 'high') {
+        state.age = 64; setSex('male'); syncSbp(152);
+        setLipidMode('ldl'); state.ldl = 158; syncPrimaryLipid(158);
+        syncHdl(38); syncTg(195);
+        document.getElementById('hasDm').checked = true;
+        document.getElementById('hasProteinuria').checked = true;
+        document.getElementById('isSmoker').checked = true;
+        document.getElementById('hasExercise').checked = false;
+        document.getElementById('isSecondary').checked = false;
+        document.getElementById('isExtremeSecondary').checked = false;
+        document.getElementById('hasCkd').checked = true;
+        document.getElementById('hasPad').checked = false;
+        document.getElementById('hasDmComplications').checked = true;
+      } else if (key === 'secondary') {
+        state.age = 68; setSex('male'); syncSbp(136);
+        setLipidMode('ldl'); state.ldl = 118; syncPrimaryLipid(118);
+        syncHdl(42); syncTg(145);
+        document.getElementById('hasDm').checked = true;
+        document.getElementById('hasProteinuria').checked = false;
+        document.getElementById('isSmoker').checked = false;
+        document.getElementById('hasExercise').checked = true;
+        document.getElementById('isSecondary').checked = true;
+        document.getElementById('isExtremeSecondary').checked = true;
+        document.getElementById('hasCkd').checked = false;
+        document.getElementById('hasPad').checked = false;
+        document.getElementById('hasDmComplications').checked = false;
+      }
+      syncAge(state.age);
+    }
+
+    function copySummary() {
+      const res = calculateScore(
+        state.age, state.sex, state.sbp, state.lipidMode,
+        state.ldl, state.nonHdl, state.hdl,
+        state.hasDm, state.hasProteinuria, state.isSmoker, state.hasExercise
+      );
+      const tier = document.getElementById('tierBadge').textContent.trim();
+      const targetLdl = document.getElementById('targetLdlVal').textContent.trim();
+      const targetTg = document.getElementById('targetTgVal').textContent.trim();
+
+      const text = `【久山町研究スコア・脂質異常症評価サマリー】
+■ 患者プロファイル: ${state.age}歳 / ${state.sex === 'male' ? '男性' : '女性'}
+■ 収縮期血圧: ${state.sbp} mmHg
+■ 脂質プロファイル:
+  - ${state.lipidMode === 'ldl' ? `LDL-C: ${state.ldl} mg/dL (目標 ${targetLdl})` : `Non-HDL-C: ${state.nonHdl} mg/dL`}
+  - HDL-C: ${state.hdl} mg/dL (目標 ≧40)
+  - TG: ${state.tg} mg/dL [${state.tgTiming === 'fasting' ? '空腹時' : '随時'}] (目標 ${targetTg})
+■ リスク因子: 糖尿病:${state.hasDm ? 'あり' : 'なし'}, 蛋白尿:${state.hasProteinuria ? '陽性' : '陰性'}, 喫煙:${state.isSmoker ? 'あり' : 'なし'}, 運動習慣:${state.hasExercise ? 'あり' : 'なし'}
+■ 区分: ${state.isSecondary ? '二次予防' : '一次予防'}
+■ 久山町スコア: ${res.total}点
+■ 10年動脈硬化性疾患発症確率: ${res.prob.toFixed(1)}%
+■ リスク分類: ${tier}
+■ 推奨方針: ${document.getElementById('urgencyText').textContent.trim()}
+(出典: 動脈硬化性疾患予防ガイドライン2022年版 / 久山町研究 2022)`;
+
+      navigator.clipboard.writeText(text);
+      const btnText = document.getElementById('copyBtnText');
+      btnText.textContent = "コピー完了！";
+      setTimeout(() => { btnText.textContent = "結果をコピー"; }, 2000);
+    }
+
+    // Initialize
+    window.onload = function() {
+      syncAge(55);
+      syncSbp(135);
+      syncPrimaryLipid(145);
+      syncHdl(45);
+      syncTg(160);
+      recalculate();
+    };
+  </script>
+</body>
+</html>
