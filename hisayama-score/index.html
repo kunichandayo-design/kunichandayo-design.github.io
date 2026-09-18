@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🫀 久山町研究スコア・脂質異常症リスク評価 Webアプリ | 動脈硬化性疾患予防ガイドライン2022準拠</title>
+  <title>💓 久山町研究スコア・脂質異常症リスク評価 Webアプリ | 動脈硬化性疾患予防ガイドライン2022準拠</title>
   <meta name="description" content="日本動脈硬化学会『動脈硬化性疾患予防ガイドライン2022年版』および九州大学久山町研究予測モデルに準拠。必須項目から冠動脈疾患・アテローム血栓性脳梗塞の10年発症確率と脂質管理目標値を即時判定。">
   
   <!-- Tailwind CSS -->
@@ -27,12 +27,14 @@
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
         <span class="hidden sm:inline">🏠 ツール集トップ</span>
       </a>
-      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-slate-950 font-black text-lg shadow-md">
-        🫀
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-rose-500 to-red-600 flex items-center justify-center text-white font-black text-lg shadow-md">
+        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+        </svg>
       </div>
       <div>
-        <span class="font-extrabold text-sm sm:text-base text-slate-100 tracking-tight flex items-center gap-1">
-          久山町研究スコア・脂質リスク評価
+        <span class="font-extrabold text-sm sm:text-base text-slate-100 tracking-tight flex items-center gap-1.5">
+          <span>💓</span> 久山町研究スコア・脂質リスク評価
         </span>
         <span class="text-[11px] text-cyan-400 font-mono block -mt-0.5">
           📜 動脈硬化性疾患予防ガイドライン2022年版 準拠
@@ -250,11 +252,11 @@
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <label class="flex items-center gap-2 p-2 rounded-lg bg-slate-950/40 border border-slate-800 cursor-pointer text-xs">
                 <input type="checkbox" id="hasCkd" onchange="recalculate()" class="rounded border-slate-700 text-cyan-500 focus:ring-0">
-                <span class="text-slate-300">🫘 CKD (慢性腎臓病)</span>
+                <span class="text-slate-300">🩺 CKD (慢性腎臓病)</span>
               </label>
               <label class="flex items-center gap-2 p-2 rounded-lg bg-slate-950/40 border border-slate-800 cursor-pointer text-xs">
                 <input type="checkbox" id="hasPad" onchange="recalculate()" class="rounded border-slate-700 text-cyan-500 focus:ring-0">
-                <span class="text-slate-300">🦵 末梢動脈疾患 (PAD)</span>
+                <span class="text-slate-300">🚶 PAD (末梢動脈疾患)</span>
               </label>
               <label class="flex items-center gap-2 p-2 rounded-lg bg-slate-950/40 border border-slate-800 cursor-pointer text-xs">
                 <input type="checkbox" id="hasDmComplications" onchange="recalculate()" class="rounded border-slate-700 text-cyan-500 focus:ring-0">
@@ -946,7 +948,7 @@
       const targetLdl = document.getElementById('targetLdlVal').textContent.trim();
       const targetTg = document.getElementById('targetTgVal').textContent.trim();
 
-      const text = `【🫀 久山町研究スコア・脂質異常症評価サマリー】
+      const text = `【💓 久山町研究スコア・脂質異常症評価サマリー】
 ■ 👤 患者プロファイル: ${state.age}歳 / ${state.sex === 'male' ? '👨 男性' : '👩 女性'}
 ■ 💓 収縮期血圧: ${state.sbp} mmHg
 ■ 🩸 脂質プロファイル:
